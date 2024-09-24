@@ -6,13 +6,13 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config({ path: './config.env' });
 const app = express();
+const messageRoute = require('./routes/messageRoute');
 
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
         origin: 'http://localhost:4200', // Replace with your Angular app URL
         methods: ['GET', 'POST'],
-        allowedHeaders: ['my-custom-header'],
         credentials: true
     }
 });
@@ -24,14 +24,14 @@ app.use(cors({
 
 // Routes
 app.use('/api/auth', require('./routes/authRoute'));
-app.use('/api/rooms', require('./routes/roomRoute'));
 app.use('/api/chats', require('./routes/chatRoute'));
+app.use('/api/messages', messageRoute);
 
 require('./socket/chatSocket')(io);
 
 const connectDb = require('../backend/config/db')
 connectDb();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3001;
 
 server.listen(port, () => {
     console.log("The server is running on port " + port);
