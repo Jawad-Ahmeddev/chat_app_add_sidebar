@@ -1,5 +1,4 @@
 const Message = require('../models/message');
-const Room = require('../models/room');
 const Chat = require('../models/chat');
 const User = require('../models/User');
 
@@ -19,6 +18,11 @@ exports.sendMessage = async (req, res) => {
     // Create a new message associated with the roomId
     const newMessage = new Message({ chat: chatId, message, sender });
     await newMessage.save();
+    chat.lastMessage = newMessage._id;
+    await chat.save();
+    req.app.get('io').to(chatId).emit('message', newMessage);
+    console.log("This is the lastmessage from the backend: ", chat.lastMessage)
+
     res.status(201).json(newMessage);
   } catch (error) {
     res.status(500).json({ error: 'Error sending message.' });
@@ -107,7 +111,8 @@ exports.getRecentChats = async (req, res) => {
       const recentChats = await Chat.find({
           participants: userId
       }).sort({ updatedAt : -1 })  // Sort by updatedAt to get the latest chats
-      .populate('participants', 'username email profilePicture');
+      .populate('participants', 'username email profilePicture')
+      .populate('lastMessage', 'message sender createdAt');  // Populate the lastMessage field
 
       res.status(200).json(recentChats);
   } catch (err) {
@@ -124,7 +129,9 @@ exports.getAllPersonalChats = async (req, res) => {
       const personalChats = await Chat.find({
           type: 'personal',
           participants: userId
-      }).populate('participants', 'username email profilePicture');
+      }).populate('participants', 'username email profilePicture')
+      .populate('lastMessage', 'message sender createdAt');  // Populate the lastMessage field
+
 
       res.status(200).json(personalChats);
   } catch (err) {
@@ -146,7 +153,9 @@ exports.getGroupChat = async (req, res) => {
   try {
     // Instead of finding by ID, we find the group chat by its type
     const groupChat = await Chat.findOne({ type: 'group' })
-  .populate('participants', 'username email profilePicture'); // Populate participants
+  .populate('participants', 'username email profilePicture')
+  .populate('lastMessage', 'message sender createdAt');  // Populate the lastMessage field
+  // Populate participants
     if (!groupChat) {
       return res.status(404).json({ message: 'Group chat not found' });
     }

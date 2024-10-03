@@ -1,7 +1,6 @@
-const Room = require('../models/room');
 const Message = require('../models/message');
 const User = require('../models/User');
-const  chat = require('../models/chat')
+const  Chat = require('../models/chat')
 
 module.exports = function (io) {
     io.on('connection', (socket) => {
@@ -25,6 +24,18 @@ module.exports = function (io) {
           });
           await newMessage.save();
       
+          const chat = await Chat.findById(chatId);
+          if (!chat) {
+            return console.error(`Chat not found: ${chatId}`);
+          }
+
+          chat.lastMessage = newMessage._id;
+
+          // Save the updated chat
+          await chat.save();
+  
+          console.log('Updated chat with lastMessage:', chat);
+  
           const fullMessageData = {
             chatId,
             message,
@@ -39,10 +50,14 @@ module.exports = function (io) {
           // Emit the message to the chat room
           io.to(chatId).emit('message', fullMessageData);
           console.log('Message broadcasted to chat room:', chatId);
+              console.log('Emitting new message to chat room:', chatId, fullMessageData);
+
         } catch (error) {
           console.error('Error emitting message:', error);
         }
       });
+
+      
       
   
       socket.on('disconnect', () => {

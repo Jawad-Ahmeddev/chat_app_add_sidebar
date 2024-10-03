@@ -87,25 +87,25 @@ exports.login = async (req, res) => {
 };
 
 
-    const updateProfilePicture = async (req, res) => {
-      try {
-          const userId = req.params.userId;
-          const user = await User.findById(userId);
+  //   const updateProfilePicture = async (req, res) => {
+  //     try {
+  //         const userId = req.params.userId;
+  //         const user = await User.findById(userId);
   
-          if (!user) {
-              return res.status(404).json({ message: 'User not found' });
-          }
+  //         if (!user) {
+  //             return res.status(404).json({ message: 'User not found' });
+  //         }
   
-          if (req.file) {
-              user.profilePicture = req.file.path; // Assuming you're storing the file path
-          }
+  //         // if (req.file) {
+  //         //     user.profilePicture = req.file.path; // Assuming you're storing the file path
+  //         // }
   
-          await user.save();
-          res.status(200).json({ profilePicture: user.profilePicture });
-      } catch (error) {
-          res.status(500).json({ message: 'Failed to update profile picture', error });
-      }
-  };
+  //         await user.save();
+  //         res.status(200).json({ profilePicture: user.profilePicture });
+  //     } catch (error) {
+  //         res.status(500).json({ message: 'Failed to update profile picture', error });
+  //     }
+  // };
 
   exports.updateUserProfile = async (req, res) => {
     const { userId } = req.params;  // Extract the userId from the route parameter

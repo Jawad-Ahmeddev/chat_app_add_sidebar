@@ -20,7 +20,9 @@ app.use(cors({
     origin: 'http://localhost:4200', // Replace with your Angular app's URL
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Allow cookies to be sent with requests
-}));app.use(express.json());
+}));
+
+app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/authRoute'));
